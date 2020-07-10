@@ -31,7 +31,7 @@ module.exports.sendHttp = function (_data, _host, _port, _path, _auth) {
         res.on('end', function () {
             xml2jsparser(dataBuffer, function (err, result) {
                 if (err) {
-                    deferred.reject(new Error('Data Parsing error', err));
+                    deferred.reject('Data Parsing error' + err.toString());
                 }
                 deferred.resolve(result);
             });
