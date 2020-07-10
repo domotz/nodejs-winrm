@@ -1,3 +1,4 @@
+const q = require('q');
 let shell = require('./src/shell.js');
 let command = require('./src/command.js');
 
@@ -6,8 +7,11 @@ module.exports = {
     command: command
 };
 
-module.exports.runCommand = async function (_command, _host, _username, _password, _port, _usePowershell = false) {
+module.exports.runCommand = function (_command, _host, _username, _password, _port, _usePowershell) {
+
+    var deferred = q.defer();
     try {
+
         var auth = 'Basic ' + Buffer.from(_username + ':' + _password, 'utf8').toString('base64');
         var params = {
             host: _host,
@@ -15,30 +19,31 @@ module.exports.runCommand = async function (_command, _host, _username, _passwor
             path: '/wsman',
         };
         params['auth'] = auth;
-        var shellId = await shell.doCreateShell(params);
-        params['shellId'] = shellId;
-    
-        params['command'] = _command;
-        var commandId
-        if ( _usePowershell ) {
-            commandId = await command.doExecutePowershell(params);
-        } else {
-            commandId = await command.doExecuteCommand(params);
-        }
-    
-        params['commandId'] = commandId;
-        var output = await command.doReceiveOutput(params);
-    
-        await shell.doDeleteShell(params);
-    
-        return output;
+        shell.doCreateShell(params).then(function (shellId) {
+            params['shellId'] = shellId;
+
+            params['command'] = _command;
+            var commandExecution;
+            if ( _usePowershell ) {
+                commandExecution = command.doExecutePowershell(params);
+            } else {
+                commandExecution = command.doExecuteCommand(params);
+            }
+            commandExecution.then(function (commandId) {
+                params['commandId'] = commandId;
+                command.doReceiveOutput(params).then(function (output) {
+                    deferred.resolve(output);
+                    shell.doDeleteShell(params)
+                });
+            });
+        });
     } catch (error) {
         console.log('error', error);
-        return error;
-    }   
-   
+        deferred.reject(error);
+    }
+    return deferred.promise;
 };
 
-module.exports.runPowershell = async function (_command, _host, _username, _password, _port) {
+module.exports.runPowershell = function (_command, _host, _username, _password, _port) {
   return module.exports.runCommand(_command, _host, _username, _password, _port, true);
 }

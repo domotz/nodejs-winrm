@@ -1,5 +1,5 @@
 {
-  "name": "nodejs-winrm",
+  "name": "nodejs-winrm-domotz",
   "version": "1.1.2",
   "description": "Make WinRM service calls from NodeJS",
   "main": "index.js",
@@ -43,6 +43,7 @@
   "dependencies": {
     "uuid": "^3.3.2",
     "js2xmlparser": "^3.0.0",
+    "q": "^1.5.1",
     "xml2js": "^0.4.19"
   },
   "devDependencies": {
