@@ -20,7 +20,7 @@ module.exports.sendHttp = function (_data, _host, _port, _path, _auth) {
 
     var req = http.request(options, function (res) {
         if (res.statusCode < 200 || res.statusCode > 299) {
-            deferred.reject(new Error('Failed to process the request, status Code: ', res.statusCode));
+            deferred.reject('Failed to process the request, status Code: ' + res.statusCode);
         }
         res.setEncoding('utf8');
         var dataBuffer = '';
