@@ -36,6 +36,9 @@ module.exports.runCommand = function (_command, _host, _username, _password, _po
                     shell.doDeleteShell(params)
                 });
             });
+        }).catch(function (error) {
+            console.log('error', error);
+            deferred.reject(error);
         });
     } catch (error) {
         console.log('error', error);
